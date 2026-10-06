@@ -1,7 +1,8 @@
 # Sistema de Gestión de Préstamos de Instrumentos Musicales
 **Proyecto Evaluativo — Programación Orientada a Objetos | Momento 2**
 
-**Integrantes:** 3 personas  
+**Integrantes:** Sebastian Manchabajoy - Hector Riascos - Steven Eraso
+
 **Tecnología:** Java 17 + Spring Boot 3.2 + H2 + Maven
 
 ---
