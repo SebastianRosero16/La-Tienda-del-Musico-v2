@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>La Tienda del Músico — POO</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Segoe UI',sans-serif; background:#0f0f1a; color:#e0e0e0; min-height:100vh; }
+
+    /* ── HEADER ── */
+    header {
+      background:linear-gradient(135deg,#1a1a2e,#0f3460);
+      padding:16px 36px; display:flex; align-items:center; gap:14px;
+      border-bottom:2px solid #e94560;
+    }
+    header .logo { font-size:2rem; }
+    header h1   { font-size:1.4rem; color:#fff; font-weight:700; }
+    header p    { font-size:0.8rem; color:#a0a0c0; margin-top:2px; }
+    .badge-api  { margin-left:auto; background:#1a3a2a; border:1px solid #2ecc71;
+                  color:#2ecc71; padding:5px 14px; border-radius:20px; font-size:0.78rem;
+                  display:flex; align-items:center; gap:6px; }
+    .dot { width:8px; height:8px; background:#2ecc71; border-radius:50%; animation:pulso 2s infinite; }
+    @keyframes pulso { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    /* ── NAV ── */
+    nav { background:#16213e; display:flex; padding:0 36px; border-bottom:1px solid #2a2a4a; gap:2px; }
+    nav button { background:none; border:none; color:#8080a0; padding:12px 20px; cursor:pointer;
+                 font-size:0.87rem; border-bottom:3px solid transparent; transition:all .2s; }
+    nav button:hover { color:#fff; }
+    nav button.act  { color:#e94560; border-bottom-color:#e94560; }
+
+    /* ── MAIN ── */
+    main { max-width:1100px; margin:26px auto; padding:0 26px; }
+    .pag { display:none; }
+    .pag.act { display:block; }
+
+    /* ── TEMA CHIP ── */
+    .tema-chip {
+      display:inline-flex; align-items:center; gap:5px;
+      background:#1a1230; border:1px solid #7c3aed;
+      color:#c084fc; padding:3px 10px; border-radius:12px;
+      font-size:0.72rem; font-weight:600; margin-bottom:10px;
+    }
+
+    /* ── SECCIÓN TÍTULO ── */
+    .stitle {
+      font-size:1.1rem; color:#fff; font-weight:600;
+      margin:22px 0 14px; display:flex; align-items:center; gap:8px;
+    }
+    .stitle::after { content:''; flex:1; height:1px; background:#2a2a4a; margin-left:8px; }
+
+    /* ── PANEL (tarjeta contenedora) ── */
+    .panel {
+      background:#1a1a2e; border:1px solid #2a2a4a;
+      border-radius:12px; padding:20px; margin-bottom:20px;
+    }
+    .panel-title { color:#e94560; font-size:0.92rem; font-weight:600; margin-bottom:14px; }
+
+    /* ── GRID DE STATS ── */
+    .stats { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:10px; margin-bottom:20px; }
+    .stat  { background:#1a1a2e; border:1px solid #2a2a4a; border-radius:10px;
+             padding:14px; text-align:center; }
+    .stat-n { font-size:1.8rem; font-weight:700; color:#e94560; }
+    .stat-l { font-size:0.72rem; color:#8080a0; text-transform:uppercase; margin-top:3px; }
+
+    /* ── TARJETAS INSTRUMENTO ── */
+    .cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px; }
+    .card  { background:#141428; border:1px solid #2a2a4a; border-radius:10px;
+             padding:15px; transition:border-color .2s; }
+    .card:hover { border-color:#e94560; }
+    .card-head  { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; }
+    .card-name  { font-weight:600; color:#fff; font-size:0.92rem; }
+    .card-tipo  { font-size:0.75rem; color:#8080a0; margin-top:2px; }
+    .card-row   { font-size:0.79rem; color:#a0a0c0; margin:3px 0;
+                  display:flex; justify-content:space-between; }
+    .card-row span:last-child { color:#e0e0e0; }
+
+    /* ── FORMULARIO ── */
+    .fgrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:10px; }
+    .fg    { display:flex; flex-direction:column; gap:4px; }
+    .fg label { font-size:0.73rem; color:#8080a0; text-transform:uppercase; }
+    .fg input, .fg select {
+      background:#0f0f1a; border:1px solid #2a2a4a; color:#e0e0e0;
+      padding:8px 10px; border-radius:7px; font-size:0.85rem; outline:none;
+    }
+    .fg input:focus, .fg select:focus { border-color:#e94560; }
+    .fg select option { background:#1a1a2e; }
+    .factions { margin-top:12px; display:flex; gap:8px; flex-wrap:wrap; }
+
+    /* ── BOTONES ── */
+    .btn { padding:8px 18px; border:none; border-radius:7px; cursor:pointer;
+           font-size:0.83rem; font-weight:600; display:inline-flex; align-items:center;
+           gap:6px; transition:all .2s; }
+    .btn-p  { background:#e94560; color:#fff; }
+    .btn-p:hover { background:#c73652; }
+    .btn-s  { background:#2a2a4a; color:#e0e0e0; }
+    .btn-s:hover { background:#3a3a5a; }
+    .btn-v  { background:#1a4a3a; color:#2ecc71; border:1px solid #2ecc71; }
+    .btn-v:hover { background:#2a5a4a; }
+    .btn-r  { background:#3a1a1a; color:#e74c3c; border:1px solid #e74c3c; }
+    .btn-xs { font-size:0.75rem; padding:4px 10px; }
+
+    /* ── TABLA ── */
+    .twrap { overflow-x:auto; border-radius:10px; border:1px solid #2a2a4a; }
+    table  { width:100%; border-collapse:collapse; background:#1a1a2e; }
+    thead tr { background:#0f0f1a; }
+    th { padding:10px 13px; text-align:left; font-size:0.72rem; color:#8080a0;
+         text-transform:uppercase; border-bottom:1px solid #2a2a4a; }
+    td { padding:10px 13px; font-size:0.82rem; border-bottom:1px solid #1f1f35;
+         color:#c0c0d0; vertical-align:middle; }
+    tr:last-child td { border-bottom:none; }
+    tr:hover td { background:#1f1f35; }
+    .tda { display:flex; gap:6px; flex-wrap:wrap; }
+
+    /* ── BADGES ── */
+    .bk { display:inline-block; padding:2px 9px; border-radius:10px;
+          font-size:0.69rem; font-weight:600; text-transform:uppercase; }
+    .bk-disp { background:#1a3a2a; color:#2ecc71; border:1px solid #2ecc71; }
+    .bk-res  { background:#3a2a1a; color:#f39c12; border:1px solid #f39c12; }
+    .bk-alq  { background:#3a1a2a; color:#e94560; border:1px solid #e94560; }
+    .bk-rep  { background:#2a2a3a; color:#9b59b6; border:1px solid #9b59b6; }
+    .bk-nvo  { background:#1a3a2a; color:#2ecc71; border:1px solid #2ecc71; }
+    .bk-uso  { background:#2a2a2a; color:#95a5a6; border:1px solid #95a5a6; }
+    .bk-ray  { background:#3a2a1a; color:#f39c12; border:1px solid #f39c12; }
+    .bk-dan  { background:#3a1a1a; color:#e74c3c; border:1px solid #e74c3c; }
+    .bk-id   { background:#1a1230; color:#c084fc; border:1px solid #7c3aed;
+               padding:2px 8px; border-radius:6px; font-size:0.72rem; font-weight:600; }
+    .bk-act  { background:#1a3a2a; color:#2ecc71; border:1px solid #2ecc71; }
+    .bk-fin  { background:#222; color:#666; border:1px solid #444; }
+
+    /* ── ALERTA ── */
+    .alerta { padding:9px 13px; border-radius:7px; margin-bottom:12px;
+              font-size:0.83rem; display:none; }
+    .alerta.show { display:flex; align-items:center; gap:7px; }
+    .al-ok  { background:#1a3a2a; border:1px solid #2ecc71; color:#2ecc71; }
+    .al-err { background:#3a1a1a; border:1px solid #e74c3c; color:#e74c3c; }
+
+    /* ── MODAL ── */
+    .ov { display:none; position:fixed; inset:0; background:rgba(0,0,0,.75);
+          z-index:99; align-items:center; justify-content:center; }
+    .ov.show { display:flex; }
+    .modal { background:#1a1a2e; border:1px solid #e94560; border-radius:12px;
+             padding:24px; width:400px; max-width:95vw; }
+    .modal h3 { color:#e94560; margin-bottom:10px; }
+    .modal p  { color:#a0a0c0; font-size:0.82rem; margin-bottom:14px; }
+
+    /* ── SELECTOR VISUAL ── */
+    .sel-box { border:1px solid #2a2a4a; border-radius:8px; background:#0f0f1a;
+               max-height:150px; overflow-y:auto; }
+    .sel-item { padding:9px 13px; cursor:pointer; border-bottom:1px solid #1f1f35;
+                transition:background .15s; }
+    .sel-item:last-child { border-bottom:none; }
+    .sel-item:hover { background:#1f1f35; }
+    .sel-item.selected { background:#2a1a3a; border-left:3px solid #e94560; }
+    .sel-item-name { color:#fff; font-size:0.84rem; font-weight:500; }
+    .sel-item-sub  { color:#8080a0; font-size:0.73rem; margin-top:2px; }
+    .sel-label { font-size:0.72rem; color:#8080a0; text-transform:uppercase; margin-bottom:5px; }
+    .sel-chosen { font-size:0.75rem; color:#6a6a8a; margin-top:4px; }
+    .sel-chosen strong { color:#e94560; }
+
+    /* ── INFO BOX TEMAS ── */
+    .tema-box {
+      background:#12122a; border:1px solid #2a2a5a; border-radius:8px;
+      padding:10px 14px; margin-bottom:14px; font-size:0.8rem; color:#9090c0;
+      line-height:1.6;
+    }
+    .tema-box .titulo { color:#e94560; font-weight:600; margin-bottom:4px; font-size:0.83rem; }
+
+    .gold { color:#f39c12; font-weight:600; }
+    .muted { color:#6a6a8a; font-size:0.76rem; }
+    .txt-w { color:#fff; }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">🎸</div>
+  <div>
+    <h1>La Tienda del Músico</h1>
+    <p>Sistema de Gestión de Préstamos — Programación Orientada a Objetos</p>
+  </div>
+  <div class="badge-api"><div class="dot"></div>API activa en :8080</div>
+</header>
+
+<!-- NAV -->
+<nav>
+  <button class="act" onclick="ir('dashboard',this)">📊 Dashboard</button>
+  <button onclick="ir('instrumentos',this)">🎸 Instrumentos</button>
+  <button onclick="ir('clientes',this)">👤 Clientes</button>
+  <button onclick="ir('reservas',this)">📋 Reservas</button>
+</nav>
+
+<main>
+
+<!-- ══════════════════ DASHBOARD ══════════════════ -->
+<div id="dashboard" class="pag act">
+
+  <div class="tema-chip">📌 Temas visibles: Modelado de Dominio · Herencia · Polimorfismo · Spring Boot REST</div>
+
+  <div class="tema-box">
+    <div class="titulo">¿Qué refleja este Dashboard?</div>
+    Los datos en tiempo real vienen de la API REST (<code>GET /api/instrumentos</code>,
+    <code>GET /api/clientes</code>, <code>GET /api/reservas/activas</code>).
+    Cada instrumento es un objeto concreto de la jerarquía de herencia:
+    <strong>GuitarraAcustica</strong>, <strong>GuitarraElectrica</strong> o
+    <strong>GuitarraClasica</strong>, todos hijos de la clase abstracta
+    <strong>Instrumento</strong>.
+  </div>
+
+  <div class="stitle">📊 Estado actual de la tienda</div>
+  <div class="stats">
+    <div class="stat"><div class="stat-n" id="s-tot">—</div><div class="stat-l">Total Instr.</div></div>
+    <div class="stat"><div class="stat-n" id="s-disp">—</div><div class="stat-l">Disponibles</div></div>
+    <div class="stat"><div class="stat-n" id="s-alq">—</div><div class="stat-l">Alquilados</div></div>
+    <div class="stat"><div class="stat-n" id="s-res">—</div><div class="stat-l">Reservados</div></div>
+    <div class="stat"><div class="stat-n" id="s-rep">—</div><div class="stat-l">Reparación</div></div>
+    <div class="stat"><div class="stat-n" id="s-cli">—</div><div class="stat-l">Clientes</div></div>
+    <div class="stat"><div class="stat-n" id="s-ract">—</div><div class="stat-l">Reservas Act.</div></div>
+  </div>
+
+  <div class="stitle">🎸 Instrumentos disponibles ahora</div>
+  <div class="cards" id="cards-dash">
+    <div class="muted" style="padding:12px">Cargando...</div>
+  </div>
+</div>
+
+<!-- ══════════════════ INSTRUMENTOS ══════════════════ -->
+<div id="instrumentos" class="pag">
+
+  <div class="tema-chip">📌 Temas visibles: Abstracción · Herencia · Encapsulamiento · Factory · State · Repository</div>
+
+  <!-- EXPLICACION TEMAS -->
+  <div class="panel">
+    <div class="panel-title">📚 Temas de POO reflejados en esta sección</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:0.8rem;color:#a0a0c0;line-height:1.6">
+      <div>
+        <strong style="color:#e94560">Abstracción + Herencia:</strong><br>
+        <code>Instrumento</code> es una clase abstracta. No se puede instanciar directamente.
+        Cada registro crea un objeto concreto:
+        <code>GuitarraAcustica</code>, <code>GuitarraElectrica</code> o <code>GuitarraClasica</code>.
+        Cada una tiene atributos propios (cuerdas, pastilla, nylon).
+      </div>
+      <div>
+        <strong style="color:#e94560">Factory:</strong><br>
+        Al registrar, el backend llama a <code>InstrumentoFactory.crearInstrumento(tipo, ...)</code>.
+        La fábrica decide qué subclase crear según el tipo elegido.
+        El servicio no usa <code>new GuitarraAcustica()</code> directamente.<br><br>
+        <strong style="color:#e94560">State:</strong><br>
+        Los botones de acción cambian según la disponibilidad del instrumento.
+        Eso es el patrón State en acción: cada estado permite acciones distintas.
+      </div>
+    </div>
+  </div>
+
+  <!-- REGISTRAR -->
+  <div class="panel">
+    <div class="panel-title">➕ Registrar nuevo instrumento — activa el patrón <span style="color:#c084fc">Factory</span></div>
+    <div id="al-inst" class="alerta"></div>
+    <div class="fgrid">
+      <div class="fg"><label>Tipo de instrumento</label>
+        <select id="i-tipo">
+          <option value="GUITARRA_ACUSTICA">🎸 Guitarra Acústica</option>
+          <option value="GUITARRA_ELECTRICA">⚡ Guitarra Eléctrica</option>
+          <option value="GUITARRA_CLASICA">🎶 Guitarra Clásica</option>
+          <option value="BAJO">🎵 Bajo Eléctrico</option>
+          <option value="UKULELE">🌺 Ukulele</option>
+        </select>
+      </div>
+      <div class="fg"><label>Marca</label><input id="i-marca" placeholder="Ej: Yamaha"/></div>
+      <div class="fg"><label>Modelo</label><input id="i-modelo" placeholder="Ej: F310"/></div>
+      <div class="fg"><label>N° de Serie</label><input id="i-serie" placeholder="Ej: YAM-100"/></div>
+      <div class="fg"><label>Precio por día ($)</label><input id="i-precio" type="number" placeholder="Ej: 25000"/></div>
+    </div>
+    <div class="factions">
+      <button class="btn btn-p" onclick="registrarInstrumento()">✅ Registrar instrumento</button>
+      <button class="btn btn-s" onclick="cargarInstrumentos()">🔄 Actualizar lista</button>
+    </div>
+  </div>
+
+  <!-- TABLA -->
+  <div class="panel-title" style="margin-bottom:8px">
+    📋 Lista de instrumentos — columna <em>Disponibilidad</em> = patrón <span style="color:#c084fc">State</span>
+  </div>
+  <div class="twrap">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th><th>Tipo (Herencia)</th><th>Marca / Modelo</th>
+          <th>N° Serie</th><th>Precio/día (Polimorf.)</th>
+          <th>Estado físico</th><th>Disponibilidad (State)</th>
+          <th>Acciones (State)</th>
+        </tr>
+      </thead>
+      <tbody id="tb-inst">
+        <tr><td colspan="8" style="text-align:center;color:#6a6a8a;padding:20px">Cargando...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════ CLIENTES ══════════════════ -->
+<div id="clientes" class="pag">
+
+  <div class="tema-chip">📌 Temas visibles: Encapsulamiento · Reglas de Negocio · Repository</div>
+
+  <div class="panel">
+    <div class="panel-title">📚 Temas de POO reflejados en esta sección</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:0.8rem;color:#a0a0c0;line-height:1.6">
+      <div>
+        <strong style="color:#e94560">Encapsulamiento:</strong><br>
+        La clase <code>Cliente</code> tiene todos sus atributos privados
+        (nombre, cédula, celular). Los setters validan que los datos
+        no estén vacíos antes de asignarlos. Nadie puede crear un cliente
+        sin datos válidos.
+      </div>
+      <div>
+        <strong style="color:#e94560">Regla de negocio encapsulada:</strong><br>
+        El método <code>puedeHacerNuevaReserva()</code> de la clase
+        <code>Cliente</code> controla que no tenga más de 3 reservas activas.
+        La regla vive dentro del objeto, no en el servicio.<br><br>
+        <strong style="color:#e94560">Repository:</strong><br>
+        <code>ClienteRepositorio</code> extiende <code>JpaRepository</code>.
+        Spring genera el SQL automáticamente, sin escribir una línea de SQL.
+      </div>
+    </div>
+  </div>
+
+  <!-- REGISTRAR CLIENTE -->
+  <div class="panel">
+    <div class="panel-title">➕ Registrar nuevo cliente — activa validaciones de <span style="color:#c084fc">Encapsulamiento</span></div>
+    <div id="al-cli" class="alerta"></div>
+    <div class="fgrid">
+      <div class="fg"><label>Nombre completo</label><input id="c-nombre" placeholder="Ej: Juan Pérez"/></div>
+      <div class="fg"><label>N° Identificación (cédula)</label><input id="c-nid" placeholder="Ej: 12345678"/></div>
+      <div class="fg"><label>Celular</label><input id="c-cel" placeholder="Ej: 3001234567"/></div>
+    </div>
+    <div class="factions">
+      <button class="btn btn-p" onclick="registrarCliente()">✅ Registrar cliente</button>
+      <button class="btn btn-s" onclick="cargarClientes()">🔄 Actualizar lista</button>
+    </div>
+  </div>
+
+  <!-- TABLA CLIENTES -->
+  <div class="panel-title" style="margin-bottom:8px">
+    📋 Lista de clientes — datos encapsulados en la clase <span style="color:#c084fc">Cliente</span>
+  </div>
+  <div class="twrap">
+    <table>
+      <thead>
+        <tr><th>ID</th><th>Nombre (privado)</th><th>Identificación (privada)</th><th>Celular (privado)</th><th>Correo</th></tr>
+      </thead>
+      <tbody id="tb-cli">
+        <tr><td colspan="5" style="text-align:center;color:#6a6a8a;padding:20px">Cargando...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════ RESERVAS ══════════════════ -->
+<div id="reservas" class="pag">
+
+  <div class="tema-chip">📌 Temas visibles: Builder · Strategy · Observer · State · Repository · Capa de Servicios</div>
+
+  <div class="panel">
+    <div class="panel-title">📚 Temas de POO reflejados en esta sección</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:0.8rem;color:#a0a0c0;line-height:1.6">
+      <div>
+        <strong style="color:#e94560">Builder:</strong><br>
+        Al crear una reserva, el backend usa <code>ReservaBuilder</code>
+        para construir el objeto paso a paso:
+        <code>.paraCliente()</code> → <code>.delInstrumento()</code> →
+        <code>.desdeFecha()</code> → <code>.hastaFecha()</code> → <code>.build()</code>.
+        El <code>build()</code> valida que todo esté completo.<br><br>
+        <strong style="color:#e94560">Strategy:</strong><br>
+        El descuento aplica un algoritmo diferente según el tipo elegido:
+        sin descuento, VIP (20% off) o temporada (10% off).
+        Cada uno es una clase separada que implementa <code>EstrategiaDescuento</code>.
+      </div>
+      <div>
+        <strong style="color:#e94560">Observer:</strong><br>
+        Al crear la reserva, el <code>GestorEventosReserva</code> notifica
+        automáticamente a todos los observadores registrados:
+        <code>ObservadorNotificacionSms</code> (muestra el SMS en consola)
+        y <code>ObservadorRegistroLog</code> (registra la operación).<br><br>
+        <strong style="color:#e94560">Adapter:</strong><br>
+        El SMS se envía a través de <code>AdaptadorSms</code>, que traduce
+        la llamada de nuestra interfaz al sistema legado
+        <code>ServicioSmsLegado.mandarSms()</code>.
+      </div>
+    </div>
+  </div>
+
+  <!-- NUEVA RESERVA -->
+  <div class="panel">
+    <div class="panel-title">➕ Nueva Reserva — activa: <span style="color:#c084fc">Builder · State · Strategy · Observer · Adapter</span></div>
+    <div id="al-res" class="alerta"></div>
+
+    <!-- Selección visual cliente + instrumento -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px">
+      <div>
+        <div class="sel-label">👤 1. Selecciona el cliente</div>
+        <div class="sel-box" id="sel-cli">
+          <div class="muted" style="padding:10px">Cargando...</div>
+        </div>
+        <div class="sel-chosen">Seleccionado: <strong id="lbl-cli">Ninguno</strong></div>
+        <input type="hidden" id="r-cli"/>
+      </div>
+      <div>
+        <div class="sel-label">🎸 2. Selecciona el instrumento disponible</div>
+        <div class="sel-box" id="sel-ins">
+          <div class="muted" style="padding:10px">Cargando...</div>
+        </div>
+        <div class="sel-chosen">Seleccionado: <strong id="lbl-ins">Ninguno</strong></div>
+        <input type="hidden" id="r-ins"/>
+      </div>
+    </div>
+
+    <!-- Fechas y descuento -->
+    <div class="fgrid">
+      <div class="fg">
+        <label>3. Fecha de inicio</label>
+        <input id="r-ini" type="date" onchange="calcDias()"/>
+      </div>
+      <div class="fg">
+        <label>4. Fecha de devolución</label>
+        <input id="r-fin" type="date" onchange="calcDias()"/>
+        <span id="hint-dias" style="font-size:0.72rem;color:#f39c12;margin-top:3px"></span>
+      </div>
+      <div class="fg">
+        <label>5. Descuento — patrón Strategy</label>
+        <select id="r-des">
+          <option value="NORMAL">Sin descuento — precio normal</option>
+          <option value="VIP">Cliente VIP — 20% off</option>
+          <option value="TEMPORADA">Temporada — 10% off</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="factions">
+      <button class="btn btn-p" onclick="crearReserva()">✅ Crear Reserva</button>
+      <button class="btn btn-s" onclick="recargarSels()">🔄 Recargar listas</button>
+      <button class="btn btn-s" onclick="cargarReservas()">🔄 Actualizar tabla</button>
+    </div>
+  </div>
+
+  <!-- TABLA RESERVAS -->
+  <div class="panel-title" style="margin-bottom:8px">
+    📋 Historial de reservas — cada fila une un <span style="color:#c084fc">Cliente</span> con un <span style="color:#c084fc">Instrumento</span>
+  </div>
+  <div class="twrap">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th><th>Cliente</th><th>Instrumento</th>
+          <th>Inicio</th><th>Devolución</th><th>Días</th>
+          <th>Total ($)</th><th>Entregado en</th><th>Estado</th><th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="tb-res">
+        <tr><td colspan="10" style="text-align:center;color:#6a6a8a;padding:20px">Cargando...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</main>
+
+<!-- MODAL DEVOLUCIÓN -->
+<div class="ov" id="ov-dev">
+  <div class="modal">
+    <h3>📦 Registrar Devolución</h3>
+    <p>¿En qué estado físico devuelve el cliente el instrumento?<br>
+       Esto actualiza el <strong style="color:#e94560">EstadoInstrumento</strong> en la base de datos.</p>
+    <input type="hidden" id="mid"/>
+    <div class="fg">
+      <label>Estado al devolver — Encapsulamiento de regla de negocio</label>
+      <select id="m-est">
+        <option value="NUEVO">⭐ Nuevo — sin daños</option>
+        <option value="USADO">📦 Usado — desgaste normal</option>
+        <option value="RAYADO">⚠️ Rayado — tiene marcas</option>
+        <option value="DANADO">❌ Dañado — requiere revisión</option>
+      </select>
+    </div>
+    <div class="factions">
+      <button class="btn btn-v" onclick="confirmarDev()">✅ Confirmar devolución</button>
+      <button class="btn btn-s" onclick="cerrarMod()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = '/api';
+let cliSel = null, insSel = null;
+let clientesCache = null;
+
+// ── NAVEGACIÓN ──
+function ir(pag, btn) {
+  document.querySelectorAll('.pag').forEach(p => p.classList.remove('act'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('act'));
+  document.getElementById(pag).classList.add('act');
+  btn.classList.add('act');
+  if (pag === 'dashboard')    cargarDash();
+  if (pag === 'instrumentos') cargarInstrumentos();
+  if (pag === 'clientes')     cargarClientes();
+  if (pag === 'reservas')     { cargarReservas(); recargarSels(); }
+}
+
+// ── HELPERS ──
+function bdis(d) {
+  const m = { DISPONIBLE:['bk-disp','✅ Disponible'], RESERVADO:['bk-res','🟡 Reservado'],
+              ALQUILADO:['bk-alq','🔴 Alquilado'], EN_REPARACION:['bk-rep','🔧 Reparación'] };
+  const [c,t] = m[d] || ['',d];
+  return `<span class="bk ${c}">${t}</span>`;
+}
+function best(e) {
+  const m = { NUEVO:['bk-nvo','⭐ Nuevo'], USADO:['bk-uso','📦 Usado'],
+              RAYADO:['bk-ray','⚠️ Rayado'], DANADO:['bk-dan','❌ Dañado'] };
+  const [c,t] = m[e] || ['',e];
+  return `<span class="bk ${c}">${t}</span>`;
+}
+function tlbl(t) {
+  const m = { GUITARRA_ACUSTICA:'🎸 G.Acústica', GUITARRA_ELECTRICA:'⚡ G.Eléctrica',
+              GUITARRA_CLASICA:'🎶 G.Clásica', BAJO:'🎵 Bajo', UKULELE:'🌺 Ukulele' };
+  return m[t] || t;
+}
+function ff(f) { if(!f) return '—'; const [y,m,d]=f.split('-'); return `${d}/${m}/${y}`; }
+function dias(a,b) { return Math.round((new Date(b)-new Date(a))/86400000); }
+function calcDias() {
+  const a=document.getElementById('r-ini').value, b=document.getElementById('r-fin').value;
+  const h=document.getElementById('hint-dias');
+  h.textContent = (a&&b&&b>a) ? `↳ ${dias(a,b)} días de alquiler` : '';
+}
+function sal(id,tp,msg) {
+  const el=document.getElementById(id);
+  el.className=`alerta ${tp==='ok'?'al-ok':'al-err'} show`;
+  el.innerHTML=(tp==='ok'?'✅ ':'❌ ')+msg;
+  setTimeout(()=>el.classList.remove('show'),4500);
+}
+
+// ── DASHBOARD ──
+async function cargarDash() {
+  try {
+    const [ir,cr,rr] = await Promise.all([
+      fetch(`${API}/instrumentos`), fetch(`${API}/clientes`), fetch(`${API}/reservas/activas`)
+    ]);
+    const ins=await ir.json(), cli=await cr.json(), res=await rr.json();
+    document.getElementById('s-tot').textContent  = ins.length;
+    document.getElementById('s-cli').textContent  = cli.length;
+    document.getElementById('s-ract').textContent = res.length;
+    document.getElementById('s-disp').textContent = ins.filter(i=>i.disponibilidad==='DISPONIBLE').length;
+    document.getElementById('s-alq').textContent  = ins.filter(i=>i.disponibilidad==='ALQUILADO').length;
+    document.getElementById('s-res').textContent  = ins.filter(i=>i.disponibilidad==='RESERVADO').length;
+    document.getElementById('s-rep').textContent  = ins.filter(i=>i.disponibilidad==='EN_REPARACION').length;
+    const disp = ins.filter(i=>i.disponibilidad==='DISPONIBLE');
+    const cont = document.getElementById('cards-dash');
+    if (!disp.length) { cont.innerHTML=`<div class="muted" style="padding:14px">No hay instrumentos disponibles.</div>`; return; }
+    cont.innerHTML = disp.map(i=>`
+      <div class="card">
+        <div class="card-head">
+          <div><div class="card-name">${i.marca} ${i.modelo}</div><div class="card-tipo">${tlbl(i.tipo)}</div></div>
+          <span class="bk-id">#${i.id.substring(0,8)}…</span>
+        </div>
+        <div class="card-row"><span>N° Serie</span><span>${i.numeroDeSerie}</span></div>
+        <div class="card-row"><span>Estado físico</span><span>${best(i.estado)}</span></div>
+        <div class="card-row"><span>Precio/día</span><span class="gold">$${i.precioPorDia.toLocaleString('es-CO')}</span></div>
+        <div style="margin-top:9px">${bdis(i.disponibilidad)}</div>
+      </div>`).join('');
+  } catch(e) { console.error(e); }
+}
+
+// ── INSTRUMENTOS ──
+async function cargarInstrumentos() {
+  const tb = document.getElementById('tb-inst');
+  tb.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#6a6a8a;padding:18px">Cargando...</td></tr>`;
+  try {
+    const data = await (await fetch(`${API}/instrumentos`)).json();
+    if (!data.length) { tb.innerHTML=`<tr><td colspan="8" style="text-align:center;color:#6a6a8a;padding:18px">No hay instrumentos registrados.</td></tr>`; return; }
+    tb.innerHTML = data.map(i=>`
+      <tr>
+        <td><span class="bk-id">#${i.id.substring(0,8)}…</span></td>
+        <td>${tlbl(i.tipo)}</td>
+        <td><span class="txt-w">${i.marca}</span><div class="muted">${i.modelo}</div></td>
+        <td style="font-family:monospace;font-size:0.78rem">${i.numeroDeSerie}</td>
+        <td class="gold">$${i.precioPorDia.toLocaleString('es-CO')}</td>
+        <td>${best(i.estado)}</td>
+        <td>${bdis(i.disponibilidad)}</td>
+        <td><div class="tda">
+          ${i.disponibilidad==='DISPONIBLE'?`
+            <span class="muted">→ Reservar en pestaña <strong style="color:#e94560">Reservas</strong></span>
+            <button class="btn btn-s btn-xs" style="color:#9b59b6;border:1px solid #9b59b6" data-id="${i.id}" data-accion="reparacion" onclick="accInst(this)">🔧 Reparar</button>`:''}
+          ${i.disponibilidad==='RESERVADO'?`
+            <button class="btn btn-v btn-xs" data-id="${i.id}" data-accion="alquilar" onclick="accInst(this)">📤 Entregar</button>`:''}
+          ${i.disponibilidad==='ALQUILADO'?`
+            <button class="btn btn-s btn-xs" style="color:#3498db;border:1px solid #3498db" data-id="${i.id}" data-accion="devolver" onclick="accInst(this)">📥 Devolver</button>`:''}
+          ${i.disponibilidad==='EN_REPARACION'?`
+            <button class="btn btn-v btn-xs" data-id="${i.id}" data-accion="reparacion/terminar" onclick="accInst(this)">✅ Terminar rep.</button>`:''}
+        </div></td>
+      </tr>`).join('');
+  } catch(e) { tb.innerHTML=`<tr><td colspan="8" style="color:#e74c3c;padding:16px">Error al conectar con la API.</td></tr>`; }
+}
+
+async function registrarInstrumento() {
+  const tipo  = document.getElementById('i-tipo').value;
+  const marca = document.getElementById('i-marca').value.trim();
+  const modelo= document.getElementById('i-modelo').value.trim();
+  const serie = document.getElementById('i-serie').value.trim();
+  const precio= document.getElementById('i-precio').value;
+  if (!marca||!modelo||!serie||!precio) { sal('al-inst','err','Completa todos los campos.'); return; }
+  try {
+    const r = await fetch(`${API}/instrumentos`,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({tipo,marca,modelo,numeroDeSerie:serie,precioPorDia:parseFloat(precio)})});
+    const d = await r.json();
+    if (r.ok) {
+      sal('al-inst','ok',`"${marca} ${modelo}" registrado con ID #${d.id} — Factory creó un objeto ${d.tipoClase||tipo}`);
+      ['i-marca','i-modelo','i-serie','i-precio'].forEach(x=>document.getElementById(x).value='');
+      cargarInstrumentos();
+    } else sal('al-inst','err',d.error||'Error al registrar.');
+  } catch(e) { sal('al-inst','err','No se pudo conectar con la API.'); }
+}
+
+async function accInst(btn) {
+  const id = btn.dataset.id;
+  const accion = btn.dataset.accion;
+  try {
+    const body = accion==='devolver' ? JSON.stringify({estado:'USADO'}) : null;
+    const r = await fetch(`${API}/instrumentos/${id}/${accion}`,{method:'PUT',
+      headers:body?{'Content-Type':'application/json'}:{}, body});
+    if (r.ok) cargarInstrumentos();
+    else { const d=await r.json(); alert('Error (State): '+(d.error||'Transición no permitida.')); }
+  } catch(e) { alert('Error al conectar.'); }
+}
+
+// ── CLIENTES ──
+async function cargarClientes() {
+  const tb = document.getElementById('tb-cli');
+  tb.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#6a6a8a;padding:18px">Cargando...</td></tr>`;
+  try {
+    const data = await obtenerClientes();
+    if (!data.length) { tb.innerHTML=`<tr><td colspan="5" style="text-align:center;color:#6a6a8a;padding:18px">No hay clientes.</td></tr>`; return; }
+    tb.innerHTML = data.map(c=>`
+      <tr>
+        <td><span class="bk-id">#${c.id.substring(0,8)}…</span></td>
+        <td><span class="txt-w">${c.nombre}</span></td>
+        <td style="font-family:monospace">${c.numeroIdentificacion}</td>
+        <td>${c.celular}</td>
+        <td class="muted">${c.correoElectronico||'—'}</td>
+      </tr>`).join('');
+  } catch(e) { tb.innerHTML=`<tr><td colspan="5" style="color:#e74c3c;padding:16px">Error al conectar.</td></tr>`; }
+}
+
+async function registrarCliente() {
+  const nombre = document.getElementById('c-nombre').value.trim();
+  const nid    = document.getElementById('c-nid').value.trim();
+  const cel    = document.getElementById('c-cel').value.trim();
+  if (!nombre||!nid||!cel) { sal('al-cli','err','Completa todos los campos.'); return; }
+  try {
+    const r = await fetch(`${API}/clientes`,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({nombre,numeroIdentificacion:nid,celular:cel})});
+    const d = await r.json();
+    if (r.ok) {
+      if (Array.isArray(clientesCache)) clientesCache.push(d);
+      sal('al-cli','ok',`"${nombre}" registrado con ID #${d.id} — atributos privados validados por Encapsulamiento`);
+      ['c-nombre','c-nid','c-cel'].forEach(x=>document.getElementById(x).value='');
+      cargarClientes();
+    } else sal('al-cli','err',d.error||'Error al registrar.');
+  } catch(e) { sal('al-cli','err','No se pudo conectar con la API.'); }
+}
+
+// ── RESERVAS — SELECTORES ──
+async function obtenerClientes() {
+  try {
+    const respuesta = await fetch(`${API}/clientes`);
+    if (!respuesta.ok) throw new Error(`Error HTTP ${respuesta.status}`);
+    const clientes = await respuesta.json();
+    if (!Array.isArray(clientes)) throw new Error('La respuesta de clientes no es una lista');
+    clientesCache = clientes;
+  } catch (error) {
+    if (!Array.isArray(clientesCache)) throw error;
+  }
+  return clientesCache;
+}
+
+async function recargarSels() {
+  // Clientes
+  const sc = document.getElementById('sel-cli');
+  try {
+    const clis = await obtenerClientes();
+    sc.innerHTML = clis.length ? clis.map(c=>`
+      <div class="sel-item" id="sc-${c.id}" data-id="${c.id}" data-nombre="${c.nombre}" onclick="elegirCli(this)">
+        <div style="display:flex;justify-content:space-between">
+          <span class="sel-item-name">${c.nombre}</span>
+          <span class="bk-id">#${c.id.substring(0,8)}…</span>
+        </div>
+        <div class="sel-item-sub">Cédula: ${c.numeroIdentificacion} · Tel: ${c.celular}</div>
+      </div>`).join('')
+    : `<div class="muted" style="padding:10px">No hay clientes. Registra uno primero.</div>`;
+  } catch(e) { sc.innerHTML=`<div style="color:#e74c3c;padding:10px;font-size:0.8rem">Error al cargar.</div>`; }
+
+  // Instrumentos disponibles
+  const si = document.getElementById('sel-ins');
+  try {
+    const ins = await (await fetch(`${API}/instrumentos/disponibles`)).json();
+    si.innerHTML = ins.length ? ins.map(i=>`
+      <div class="sel-item" id="si-${i.id}" data-id="${i.id}" data-nombre="${i.marca} ${i.modelo}" data-precio="${i.precioPorDia}" onclick="elegirIns(this)">
+        <div style="display:flex;justify-content:space-between">
+          <span class="sel-item-name">${i.marca} ${i.modelo}</span>
+          <span class="bk-id">#${i.id.substring(0,8)}…</span>
+        </div>
+        <div class="sel-item-sub">${tlbl(i.tipo)} · $${i.precioPorDia.toLocaleString('es-CO')}/día · Serie: ${i.numeroDeSerie}</div>
+      </div>`).join('')
+    : `<div class="muted" style="padding:10px">No hay instrumentos disponibles.</div>`;
+  } catch(e) { si.innerHTML=`<div style="color:#e74c3c;padding:10px;font-size:0.8rem">Error al cargar.</div>`; }
+}
+
+function elegirCli(el) {
+  const id = el.dataset.id;
+  const nombre = el.dataset.nombre;
+  cliSel = id;
+  document.getElementById('r-cli').value = id;
+  document.getElementById('lbl-cli').textContent = `${nombre} (ID #${id.substring(0,8)}…)`;
+  document.querySelectorAll('[id^="sc-"]').forEach(e=>e.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function elegirIns(el) {
+  const id = el.dataset.id;
+  const nombre = el.dataset.nombre;
+  const precio = parseFloat(el.dataset.precio);
+  insSel = id;
+  document.getElementById('r-ins').value = id;
+  document.getElementById('lbl-ins').textContent = `${nombre} — $${precio.toLocaleString('es-CO')}/día (ID #${id.substring(0,8)}…)`;
+  document.querySelectorAll('[id^="si-"]').forEach(e=>e.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+async function crearReserva() {
+  const cId = document.getElementById('r-cli').value;
+  const iId = document.getElementById('r-ins').value;
+  const ini = document.getElementById('r-ini').value;
+  const fin = document.getElementById('r-fin').value;
+  const des = document.getElementById('r-des').value;
+  if (!cId) { sal('al-res','err','Selecciona un cliente de la lista.'); return; }
+  if (!iId) { sal('al-res','err','Selecciona un instrumento de la lista.'); return; }
+  if (!ini) { sal('al-res','err','Indica la fecha de inicio.'); return; }
+  if (!fin) { sal('al-res','err','Indica la fecha de devolución.'); return; }
+  if (fin <= ini) { sal('al-res','err','La fecha de devolución debe ser posterior al inicio.'); return; }
+  try {
+    const r = await fetch(`${API}/reservas`,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({clienteId:cId,instrumentoId:iId,
+        fechaInicio:ini,fechaDevolucion:fin,tipoDescuento:des})});
+    const d = await r.json();
+    if (r.ok) {
+      const d2=dias(ini,fin);
+      sal('al-res','ok',
+        `Reserva #${d.id} creada ✔ | ${d2} días | Total: $${d.precioTotal?.toLocaleString('es-CO')} | Observer notificó por SMS y Log (ver consola del backend)`);
+      cliSel=null; insSel=null;
+      ['r-cli','r-ins','r-ini','r-fin'].forEach(x=>document.getElementById(x).value='');
+      document.getElementById('lbl-cli').textContent='Ninguno';
+      document.getElementById('lbl-ins').textContent='Ninguno';
+      document.getElementById('hint-dias').textContent='';
+      cargarReservas(); recargarSels();
+    } else sal('al-res','err',d.error||'No se pudo crear la reserva.');
+  } catch(e) { sal('al-res','err','No se pudo conectar con la API.'); }
+}
+
+async function cargarReservas() {
+  const tb = document.getElementById('tb-res');
+  tb.innerHTML = `<tr><td colspan="10" style="text-align:center;color:#6a6a8a;padding:18px">Cargando...</td></tr>`;
+  try {
+    const data = await (await fetch(`${API}/reservas`)).json();
+    if (!data.length) { tb.innerHTML=`<tr><td colspan="10" style="text-align:center;color:#6a6a8a;padding:18px">No hay reservas.</td></tr>`; return; }
+    tb.innerHTML = data.map(r=>`
+      <tr>
+        <td><span class="bk-id">#${r.id.substring(0,8)}…</span></td>
+        <td>
+          <span class="txt-w">${r.cliente?.nombre||'—'}</span>
+          <div class="muted">Tel: ${r.cliente?.celular||'—'}</div>
+        </td>
+        <td>
+          <span class="txt-w">${r.instrumento?.marca||''} ${r.instrumento?.modelo||''}</span>
+          <div class="muted">${tlbl(r.instrumento?.tipo||'')}</div>
+        </td>
+        <td>${ff(r.fechaInicio)}</td>
+        <td>${ff(r.fechaDevolucion)}</td>
+        <td style="text-align:center"><strong>${dias(r.fechaInicio,r.fechaDevolucion)}</strong></td>
+        <td class="gold">$${r.precioTotal.toLocaleString('es-CO')}</td>
+        <td class="muted">${r.estadoAlMomentoDeEntrega||'—'}</td>
+        <td><span class="bk ${r.activa?'bk-act':'bk-fin'}">${r.activa?'🟢 Activa':'⚫ Finalizada'}</span></td>
+        <td><div class="tda">
+          ${r.activa
+            ? `<button class="btn btn-v btn-xs" data-id="${r.id}" onclick="abrirDev(this)">📥 Devolver</button>
+               <button class="btn btn-r btn-xs" data-id="${r.id}" onclick="cancelar(this)">❌ Cancelar</button>`
+            : `<span class="muted">Finalizada</span>`}
+        </div></td>
+      </tr>`).join('');
+  } catch(e) { tb.innerHTML=`<tr><td colspan="10" style="color:#e74c3c;padding:16px">Error al conectar.</td></tr>`; }
+}
+
+async function cancelar(btn) {
+  const id = btn.dataset.id;
+  if (!confirm(`¿Cancelar esta reserva? El instrumento volverá a estar disponible.`)) return;
+  try {
+    const r = await fetch(`${API}/reservas/${id}`,{method:'DELETE'});
+    if (r.ok) { cargarReservas(); recargarSels(); }
+    else { const d=await r.json(); alert('Error: '+(d.error||'No se pudo cancelar.')); }
+  } catch(e) { alert('Error al conectar.'); }
+}
+
+function abrirDev(btn) {
+  document.getElementById('mid').value = btn.dataset.id;
+  document.getElementById('ov-dev').classList.add('show');
+}
+function cerrarMod() { document.getElementById('ov-dev').classList.remove('show'); }
+
+async function confirmarDev() {
+  const id  = document.getElementById('mid').value;
+  const est = document.getElementById('m-est').value;
+  try {
+    const r = await fetch(`${API}/reservas/${id}/devolucion`,{method:'PUT',
+      headers:{'Content-Type':'application/json'},body:JSON.stringify({estadoDevolucion:est})});
+    if (r.ok) { cerrarMod(); cargarReservas(); recargarSels(); }
+    else { const d=await r.json(); alert('Error: '+(d.error||'No se pudo registrar.')); }
+  } catch(e) { alert('Error al conectar.'); }
+}
+
+// ── INIT ──
+window.addEventListener('load', cargarDash);
+</script>
+</body>
+</html>

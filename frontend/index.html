@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>La Tienda del Músico</title>
+  <style>
+    /* ===================== RESET Y BASE ===================== */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #0f0f1a;
+      color: #e0e0e0;
+      min-height: 100vh;
+    }
+
+    /* ===================== HEADER ===================== */
+    header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      padding: 20px 40px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      border-bottom: 2px solid #e94560;
+      box-shadow: 0 4px 20px rgba(233, 69, 96, 0.3);
+    }
+
+    header .logo { font-size: 2.2rem; }
+
+    header h1 {
+      font-size: 1.6rem;
+      color: #fff;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    header p {
+      font-size: 0.85rem;
+      color: #a0a0c0;
+      margin-top: 2px;
+    }
+
+    header .status-badge {
+      margin-left: auto;
+      background: #1a3a2a;
+      border: 1px solid #2ecc71;
+      color: #2ecc71;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot-green {
+      width: 8px; height: 8px;
+      background: #2ecc71;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+
+    /* ===================== NAV TABS ===================== */
+    nav {
+      background: #16213e;
+      display: flex;
+      gap: 4px;
+      padding: 0 40px;
+      border-bottom: 1px solid #2a2a4a;
+    }
+
+    nav button {
+      background: none;
+      border: none;
+      color: #8080a0;
+      padding: 14px 22px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    nav button:hover { color: #fff; }
+
+    nav button.active {
+      color: #e94560;
+      border-bottom-color: #e94560;
+    }
+
+    /* ===================== LAYOUT PRINCIPAL ===================== */
+    main {
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 0 30px;
+    }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    .section-title {
+      font-size: 1.3rem;
+      color: #fff;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #2a2a4a;
+      margin-left: 10px;
+    }
+
+    /* ===================== CARDS ===================== */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 30px;
+    }
+
+    .card {
+      background: #1a1a2e;
+      border: 1px solid #2a2a4a;
+      border-radius: 12px;
+      padding: 18px;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      border-color: #e94560;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .card-title {
+      font-weight: 600;
+      color: #fff;
+      font-size: 1rem;
+    }
+
+    .card-subtitle {
+      font-size: 0.8rem;
+      color: #8080a0;
+      margin-top: 2px;
+    }
+
+    .card-icon { font-size: 1.6rem; }
+
+    .card-detail {
+      font-size: 0.82rem;
+      color: #a0a0c0;
+      margin: 4px 0;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .card-detail span:last-child { color: #e0e0e0; }
+
+    /* ===================== BADGES ===================== */
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .badge-disponible  { background: #1a3a2a; color: #2ecc71; border: 1px solid #2ecc71; }
+    .badge-reservado   { background: #3a2a1a; color: #f39c12; border: 1px solid #f39c12; }
+    .badge-alquilado   { background: #3a1a2a; color: #e94560; border: 1px solid #e94560; }
+    .badge-reparacion  { background: #2a2a3a; color: #9b59b6; border: 1px solid #9b59b6; }
+    .badge-nuevo       { background: #1a3a2a; color: #2ecc71; border: 1px solid #2ecc71; }
+    .badge-usado       { background: #2a2a2a; color: #95a5a6; border: 1px solid #95a5a6; }
+    .badge-rayado      { background: #3a2a1a; color: #f39c12; border: 1px solid #f39c12; }
+    .badge-danado      { background: #3a1a1a; color: #e74c3c; border: 1px solid #e74c3c; }
+
+    /* ===================== FORMULARIOS ===================== */
+    .form-panel {
+      background: #1a1a2e;
+      border: 1px solid #2a2a4a;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 30px;
+    }
+
+    .form-panel h3 {
+      color: #e94560;
+      margin-bottom: 18px;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 14px;
+    }
+
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+
+    .form-group label {
+      font-size: 0.78rem;
+      color: #8080a0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-group input,
+    .form-group select {
+      background: #0f0f1a;
+      border: 1px solid #2a2a4a;
+      color: #e0e0e0;
+      padding: 9px 12px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus { border-color: #e94560; }
+
+    .form-group select option { background: #1a1a2e; }
+
+    .btn {
+      padding: 10px 22px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.88rem;
+      font-weight: 600;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .btn-primary {
+      background: #e94560;
+      color: #fff;
+    }
+    .btn-primary:hover { background: #c73652; transform: translateY(-1px); }
+
+    .btn-secondary {
+      background: #2a2a4a;
+      color: #e0e0e0;
+    }
+    .btn-secondary:hover { background: #3a3a5a; }
+
+    .btn-success {
+      background: #1a5a3a;
+      color: #2ecc71;
+      border: 1px solid #2ecc71;
+    }
+    .btn-success:hover { background: #2a6a4a; }
+
+    .btn-warning {
+      background: #5a3a1a;
+      color: #f39c12;
+      border: 1px solid #f39c12;
+      font-size: 0.78rem;
+      padding: 6px 12px;
+    }
+
+    .btn-danger {
+      background: #3a1a1a;
+      color: #e74c3c;
+      border: 1px solid #e74c3c;
+      font-size: 0.78rem;
+      padding: 6px 12px;
+    }
+
+    .form-actions {
+      margin-top: 16px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    /* ===================== TABLA ===================== */
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid #2a2a4a;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #1a1a2e;
+    }
+
+    thead tr { background: #0f0f1a; }
+
+    th {
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 0.78rem;
+      color: #8080a0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid #2a2a4a;
+    }
+
+    td {
+      padding: 12px 16px;
+      font-size: 0.85rem;
+      border-bottom: 1px solid #1f1f35;
+      color: #c0c0d0;
+      vertical-align: middle;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #1f1f35; }
+
+    .td-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    /* ===================== ALERTAS ===================== */
+    .alert {
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 0.88rem;
+      display: none;
+    }
+
+    .alert.show { display: flex; align-items: center; gap: 10px; }
+
+    .alert-success {
+      background: #1a3a2a;
+      border: 1px solid #2ecc71;
+      color: #2ecc71;
+    }
+
+    .alert-error {
+      background: #3a1a1a;
+      border: 1px solid #e74c3c;
+      color: #e74c3c;
+    }
+
+    /* ===================== STATS ===================== */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: #1a1a2e;
+      border: 1px solid #2a2a4a;
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #e94560;
+    }
+
+    .stat-label {
+      font-size: 0.78rem;
+      color: #8080a0;
+      margin-top: 4px;
+      text-transform: uppercase;
+    }
+
+    /* ===================== EMPTY STATE ===================== */
+    .empty {
+      text-align: center;
+      padding: 50px 20px;
+      color: #4a4a6a;
+    }
+
+    .empty .empty-icon { font-size: 3rem; margin-bottom: 10px; }
+    .empty p { font-size: 0.9rem; }
+
+    /* ===================== LOADING ===================== */
+    .loading {
+      text-align: center;
+      padding: 30px;
+      color: #8080a0;
+      font-size: 0.9rem;
+    }
+
+    /* ===================== MODAL DEVOLUCION ===================== */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.show { display: flex; }
+
+    .modal {
+      background: #1a1a2e;
+      border: 1px solid #e94560;
+      border-radius: 14px;
+      padding: 28px;
+      width: 380px;
+      max-width: 95vw;
+    }
+
+    .modal h3 {
+      color: #e94560;
+      margin-bottom: 18px;
+      font-size: 1rem;
+    }
+
+    .modal .form-actions { margin-top: 20px; }
+
+    /* ===================== PRECIO HIGHLIGHT ===================== */
+    .precio-highlight {
+      color: #f39c12;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">🎸</div>
+  <div>
+    <h1>La Tienda del Músico</h1>
+    <p>Sistema de Gestión de Préstamos de Instrumentos Musicales</p>
+  </div>
+  <div class="status-badge">
+    <div class="dot-green"></div>
+    API Conectada
+  </div>
+</header>
+
+<!-- NAV -->
+<nav>
+  <button class="active" onclick="mostrarSeccion('dashboard')">
+    📊 Dashboard
+  </button>
+  <button onclick="mostrarSeccion('instrumentos')">
+    🎸 Instrumentos
+  </button>
+  <button onclick="mostrarSeccion('clientes')">
+    👤 Clientes
+  </button>
+  <button onclick="mostrarSeccion('reservas')">
+    📋 Reservas
+  </button>
+</nav>
+
+<main>
+
+  <!-- ===================== DASHBOARD ===================== -->
+  <section id="dashboard" class="section active">
+    <div class="section-title">📊 Resumen General</div>
+
+    <div class="stats-row" id="stats-row">
+      <div class="stat-card">
+        <div class="stat-number" id="stat-total">—</div>
+        <div class="stat-label">Instrumentos</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="stat-disponibles">—</div>
+        <div class="stat-label">Disponibles</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="stat-alquilados">—</div>
+        <div class="stat-label">Alquilados</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="stat-reservados">—</div>
+        <div class="stat-label">Reservados</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="stat-reparacion">—</div>
+        <div class="stat-label">En Reparación</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="stat-clientes">—</div>
+        <div class="stat-label">Clientes</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="stat-reservas-activas">—</div>
+        <div class="stat-label">Reservas Activas</div>
+      </div>
+    </div>
+
+    <div class="section-title">🎸 Instrumentos Disponibles Ahora</div>
+    <div class="cards-grid" id="dashboard-disponibles">
+      <div class="loading">Cargando...</div>
+    </div>
+  </section>
+
+  <!-- ===================== INSTRUMENTOS ===================== -->
+  <section id="instrumentos" class="section">
+    <div class="section-title">🎸 Gestión de Instrumentos</div>
+
+    <!-- Formulario registrar -->
+    <div class="form-panel">
+      <h3>➕ Registrar Nuevo Instrumento</h3>
+      <div id="alert-instrumento" class="alert"></div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Tipo</label>
+          <select id="inp-tipo">
+            <option value="GUITARRA_ACUSTICA">Guitarra Acústica</option>
+            <option value="GUITARRA_ELECTRICA">Guitarra Eléctrica</option>
+            <option value="GUITARRA_CLASICA">Guitarra Clásica</option>
+            <option value="BAJO">Bajo Eléctrico</option>
+            <option value="UKULELE">Ukulele</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Marca</label>
+          <input id="inp-marca" placeholder="Ej: Yamaha" />
+        </div>
+        <div class="form-group">
+          <label>Modelo</label>
+          <input id="inp-modelo" placeholder="Ej: F310" />
+        </div>
+        <div class="form-group">
+          <label>N° de Serie</label>
+          <input id="inp-serie" placeholder="Ej: YAM-100" />
+        </div>
+        <div class="form-group">
+          <label>Precio por día ($)</label>
+          <input id="inp-precio" type="number" placeholder="Ej: 25000" />
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="registrarInstrumento()">
+          ✅ Registrar Instrumento
+        </button>
+        <button class="btn btn-secondary" onclick="cargarInstrumentos()">
+          🔄 Actualizar lista
+        </button>
+      </div>
+    </div>
+
+    <!-- Tabla instrumentos -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Tipo</th>
+            <th>Marca / Modelo</th>
+            <th>N° Serie</th>
+            <th>Precio/día</th>
+            <th>Estado Físico</th>
+            <th>Disponibilidad</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-instrumentos">
+          <tr><td colspan="8" class="loading">Cargando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ===================== CLIENTES ===================== -->
+  <section id="clientes" class="section">
+    <div class="section-title">👤 Gestión de Clientes</div>
+
+    <div class="form-panel">
+      <h3>➕ Registrar Nuevo Cliente</h3>
+      <div id="alert-cliente" class="alert"></div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Nombre completo</label>
+          <input id="inp-nombre" placeholder="Ej: Juan Pérez" />
+        </div>
+        <div class="form-group">
+          <label>N° Identificación</label>
+          <input id="inp-id" placeholder="Ej: 12345678" />
+        </div>
+        <div class="form-group">
+          <label>Celular</label>
+          <input id="inp-cel" placeholder="Ej: 3001234567" />
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="registrarCliente()">
+          ✅ Registrar Cliente
+        </button>
+        <button class="btn btn-secondary" onclick="cargarClientes()">
+          🔄 Actualizar lista
+        </button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Identificación</th>
+            <th>Celular</th>
+            <th>Correo</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-clientes">
+          <tr><td colspan="5" class="loading">Cargando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ===================== RESERVAS ===================== -->
+  <section id="reservas" class="section">
+    <div class="section-title">📋 Gestión de Reservas</div>
+
+    <div class="form-panel">
+      <h3>➕ Nueva Reserva</h3>
+      <div id="alert-reserva" class="alert"></div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>ID del Cliente</label>
+          <input id="inp-res-cliente" type="number" placeholder="Ej: 1" />
+        </div>
+        <div class="form-group">
+          <label>ID del Instrumento</label>
+          <input id="inp-res-instrumento" type="number" placeholder="Ej: 1" />
+        </div>
+        <div class="form-group">
+          <label>Fecha de Inicio</label>
+          <input id="inp-res-inicio" type="date" />
+        </div>
+        <div class="form-group">
+          <label>Fecha de Devolución</label>
+          <input id="inp-res-fin" type="date" />
+        </div>
+        <div class="form-group">
+          <label>Tipo de Descuento</label>
+          <select id="inp-res-descuento">
+            <option value="NORMAL">Sin descuento (Normal)</option>
+            <option value="VIP">Cliente VIP (20% off)</option>
+            <option value="TEMPORADA">Temporada (10% off)</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="crearReserva()">
+          ✅ Crear Reserva
+        </button>
+        <button class="btn btn-secondary" onclick="cargarReservas()">
+          🔄 Actualizar lista
+        </button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Cliente</th>
+            <th>Instrumento</th>
+            <th>Inicio</th>
+            <th>Devolución</th>
+            <th>Días</th>
+            <th>Total</th>
+            <th>Estado Entrega</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-reservas">
+          <tr><td colspan="10" class="loading">Cargando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<!-- MODAL DEVOLUCIÓN -->
+<div class="modal-overlay" id="modal-devolucion">
+  <div class="modal">
+    <h3>📦 Registrar Devolución</h3>
+    <p style="color:#a0a0c0; font-size:0.85rem; margin-bottom:16px;">
+      Indica el estado físico en que el cliente devuelve el instrumento.
+    </p>
+    <input type="hidden" id="modal-reserva-id" />
+    <div class="form-group">
+      <label>Estado del instrumento al devolver</label>
+      <select id="modal-estado">
+        <option value="NUEVO">Nuevo - Sin daños</option>
+        <option value="USADO">Usado - Desgaste normal</option>
+        <option value="RAYADO">Rayado - Tiene marcas</option>
+        <option value="DANADO">Dañado - Requiere revisión</option>
+      </select>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-success" onclick="confirmarDevolucion()">
+        ✅ Confirmar Devolución
+      </button>
+      <button class="btn btn-secondary" onclick="cerrarModal()">
+        Cancelar
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = 'http://localhost:8080/api';
+
+  // ===================== NAVEGACION =====================
+  function mostrarSeccion(nombre) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    document.getElementById(nombre).classList.add('active');
+    event.currentTarget.classList.add('active');
+
+    // Cargar datos al cambiar de seccion
+    if (nombre === 'dashboard')    cargarDashboard();
+    if (nombre === 'instrumentos') cargarInstrumentos();
+    if (nombre === 'clientes')     cargarClientes();
+    if (nombre === 'reservas')     cargarReservas();
+  }
+
+  // ===================== UTILIDADES =====================
+  function badgeDisponibilidad(d) {
+    const map = {
+      DISPONIBLE:    ['badge-disponible',  '✅ Disponible'],
+      RESERVADO:     ['badge-reservado',   '🟡 Reservado'],
+      ALQUILADO:     ['badge-alquilado',   '🔴 Alquilado'],
+      EN_REPARACION: ['badge-reparacion',  '🔧 Reparación'],
+    };
+    const [cls, txt] = map[d] || ['', d];
+    return `<span class="badge ${cls}">${txt}</span>`;
+  }
+
+  function badgeEstado(e) {
+    const map = {
+      NUEVO:  ['badge-nuevo',  '⭐ Nuevo'],
+      USADO:  ['badge-usado',  '📦 Usado'],
+      RAYADO: ['badge-rayado', '⚠️ Rayado'],
+      DANADO: ['badge-danado', '❌ Dañado'],
+    };
+    const [cls, txt] = map[e] || ['', e];
+    return `<span class="badge ${cls}">${txt}</span>`;
+  }
+
+  function tipoLabel(t) {
+    const map = {
+      GUITARRA_ACUSTICA:  '🎸 G. Acústica',
+      GUITARRA_ELECTRICA: '⚡ G. Eléctrica',
+      GUITARRA_CLASICA:   '🎶 G. Clásica',
+      BAJO:               '🎵 Bajo',
+      UKULELE:            '🌺 Ukulele',
+    };
+    return map[t] || t;
+  }
+
+  function showAlert(id, tipo, msg) {
+    const el = document.getElementById(id);
+    el.className = `alert alert-${tipo} show`;
+    el.innerHTML = (tipo === 'success' ? '✅ ' : '❌ ') + msg;
+    setTimeout(() => el.classList.remove('show'), 4000);
+  }
+
+  function formatFecha(f) {
+    if (!f) return '—';
+    const [y,m,d] = f.split('-');
+    return `${d}/${m}/${y}`;
+  }
+
+  function diasEntre(inicio, fin) {
+    const d1 = new Date(inicio), d2 = new Date(fin);
+    return Math.round((d2 - d1) / 86400000);
+  }
+
+  // ===================== DASHBOARD =====================
+  async function cargarDashboard() {
+    try {
+      const [instrRes, cliRes, resRes] = await Promise.all([
+        fetch(`${API}/instrumentos`),
+        fetch(`${API}/clientes`),
+        fetch(`${API}/reservas/activas`),
+      ]);
+      const instrumentos = await instrRes.json();
+      const clientes     = await cliRes.json();
+      const reservas     = await resRes.json();
+
+      document.getElementById('stat-total').textContent     = instrumentos.length;
+      document.getElementById('stat-clientes').textContent  = clientes.length;
+      document.getElementById('stat-reservas-activas').textContent = reservas.length;
+
+      const disp = instrumentos.filter(i => i.disponibilidad === 'DISPONIBLE').length;
+      const alq  = instrumentos.filter(i => i.disponibilidad === 'ALQUILADO').length;
+      const res  = instrumentos.filter(i => i.disponibilidad === 'RESERVADO').length;
+      const rep  = instrumentos.filter(i => i.disponibilidad === 'EN_REPARACION').length;
+
+      document.getElementById('stat-disponibles').textContent = disp;
+      document.getElementById('stat-alquilados').textContent  = alq;
+      document.getElementById('stat-reservados').textContent  = res;
+      document.getElementById('stat-reparacion').textContent  = rep;
+
+      // Tarjetas de disponibles
+      const container = document.getElementById('dashboard-disponibles');
+      const disponibles = instrumentos.filter(i => i.disponibilidad === 'DISPONIBLE');
+
+      if (disponibles.length === 0) {
+        container.innerHTML = `<div class="empty"><div class="empty-icon">🎸</div><p>No hay instrumentos disponibles ahora mismo.</p></div>`;
+        return;
+      }
+
+      container.innerHTML = disponibles.map(i => `
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">${i.marca} ${i.modelo}</div>
+              <div class="card-subtitle">${tipoLabel(i.tipo)}</div>
+            </div>
+            <div class="card-icon">🎸</div>
+          </div>
+          <div class="card-detail">
+            <span>N° Serie</span>
+            <span>${i.numeroDeSerie}</span>
+          </div>
+          <div class="card-detail">
+            <span>Estado</span>
+            <span>${badgeEstado(i.estado)}</span>
+          </div>
+          <div class="card-detail">
+            <span>Precio/día</span>
+            <span class="precio-highlight">$${i.precioPorDia.toLocaleString('es-CO')}</span>
+          </div>
+          <div style="margin-top:12px">
+            ${badgeDisponibilidad(i.disponibilidad)}
+          </div>
+        </div>
+      `).join('');
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  // ===================== INSTRUMENTOS =====================
+  async function cargarInstrumentos() {
+    const tbody = document.getElementById('tabla-instrumentos');
+    tbody.innerHTML = `<tr><td colspan="8" class="loading">Cargando...</td></tr>`;
+    try {
+      const res  = await fetch(`${API}/instrumentos`);
+      const data = await res.json();
+
+      if (!data.length) {
+        tbody.innerHTML = `<tr><td colspan="8" class="loading">No hay instrumentos registrados.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = data.map(i => `
+        <tr>
+          <td><strong style="color:#e94560">#${i.id}</strong></td>
+          <td>${tipoLabel(i.tipo)}</td>
+          <td>
+            <strong style="color:#fff">${i.marca}</strong>
+            <div style="font-size:0.78rem;color:#8080a0">${i.modelo}</div>
+          </td>
+          <td style="font-family:monospace;font-size:0.8rem">${i.numeroDeSerie}</td>
+          <td class="precio-highlight">$${i.precioPorDia.toLocaleString('es-CO')}</td>
+          <td>${badgeEstado(i.estado)}</td>
+          <td>${badgeDisponibilidad(i.disponibilidad)}</td>
+          <td>
+            <div class="td-actions">
+              ${i.disponibilidad === 'DISPONIBLE' ? `
+                <button class="btn btn-warning" onclick="cambiarEstado(${i.id},'reservar')">🔒 Reservar</button>
+                <button class="btn btn-warning" onclick="cambiarEstado(${i.id},'reparacion')" style="color:#9b59b6;border-color:#9b59b6">🔧 Reparar</button>
+              ` : ''}
+              ${i.disponibilidad === 'RESERVADO' ? `
+                <button class="btn btn-success" onclick="cambiarEstado(${i.id},'alquilar')" style="font-size:0.78rem;padding:6px 12px">📤 Entregar</button>
+              ` : ''}
+              ${i.disponibilidad === 'ALQUILADO' ? `
+                <button class="btn btn-secondary" onclick="cambiarEstado(${i.id},'devolver')" style="font-size:0.78rem;padding:6px 12px;color:#3498db;border:1px solid #3498db">📥 Devolver</button>
+              ` : ''}
+              ${i.disponibilidad === 'EN_REPARACION' ? `
+                <button class="btn btn-success" onclick="cambiarEstado(${i.id},'reparacion/terminar')" style="font-size:0.78rem;padding:6px 12px">✅ Terminar rep.</button>
+              ` : ''}
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    } catch (err) {
+      tbody.innerHTML = `<tr><td colspan="8" style="color:#e74c3c;padding:20px">Error al conectar con la API. ¿Está corriendo el backend?</td></tr>`;
+    }
+  }
+
+  async function registrarInstrumento() {
+    const tipo   = document.getElementById('inp-tipo').value;
+    const marca  = document.getElementById('inp-marca').value.trim();
+    const modelo = document.getElementById('inp-modelo').value.trim();
+    const serie  = document.getElementById('inp-serie').value.trim();
+    const precio = document.getElementById('inp-precio').value;
+
+    if (!marca || !modelo || !serie || !precio) {
+      showAlert('alert-instrumento', 'error', 'Completa todos los campos.');
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API}/instrumentos`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tipo, marca, modelo, numeroDeSerie: serie, precioPorDia: parseFloat(precio) })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showAlert('alert-instrumento', 'success', `Instrumento "${marca} ${modelo}" registrado con ID #${data.id}`);
+        document.getElementById('inp-marca').value = '';
+        document.getElementById('inp-modelo').value = '';
+        document.getElementById('inp-serie').value = '';
+        document.getElementById('inp-precio').value = '';
+        cargarInstrumentos();
+      } else {
+        showAlert('alert-instrumento', 'error', data.error || 'Error al registrar.');
+      }
+    } catch (err) {
+      showAlert('alert-instrumento', 'error', 'No se pudo conectar con la API.');
+    }
+  }
+
+  async function cambiarEstado(id, accion) {
+    try {
+      const body = accion === 'devolver' ? JSON.stringify({ estado: 'USADO' }) : null;
+      const res = await fetch(`${API}/instrumentos/${id}/${accion}`, {
+        method: 'PUT',
+        headers: body ? { 'Content-Type': 'application/json' } : {},
+        body
+      });
+      if (res.ok) cargarInstrumentos();
+      else {
+        const d = await res.json();
+        alert('Error: ' + (d.error || 'No se pudo realizar la accion.'));
+      }
+    } catch (err) {
+      alert('Error al conectar con la API.');
+    }
+  }
+
+  // ===================== CLIENTES =====================
+  async function cargarClientes() {
+    const tbody = document.getElementById('tabla-clientes');
+    tbody.innerHTML = `<tr><td colspan="5" class="loading">Cargando...</td></tr>`;
+    try {
+      const res  = await fetch(`${API}/clientes`);
+      const data = await res.json();
+      if (!data.length) {
+        tbody.innerHTML = `<tr><td colspan="5" class="loading">No hay clientes registrados.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = data.map(c => `
+        <tr>
+          <td><strong style="color:#e94560">#${c.id}</strong></td>
+          <td><strong style="color:#fff">${c.nombre}</strong></td>
+          <td style="font-family:monospace">${c.numeroIdentificacion}</td>
+          <td>${c.celular}</td>
+          <td style="color:#8080a0">${c.correoElectronico || '—'}</td>
+        </tr>
+      `).join('');
+    } catch (err) {
+      tbody.innerHTML = `<tr><td colspan="5" style="color:#e74c3c;padding:20px">Error al conectar con la API.</td></tr>`;
+    }
+  }
+
+  async function registrarCliente() {
+    const nombre = document.getElementById('inp-nombre').value.trim();
+    const id     = document.getElementById('inp-id').value.trim();
+    const cel    = document.getElementById('inp-cel').value.trim();
+
+    if (!nombre || !id || !cel) {
+      showAlert('alert-cliente', 'error', 'Completa todos los campos.');
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API}/clientes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre, numeroIdentificacion: id, celular: cel })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showAlert('alert-cliente', 'success', `Cliente "${nombre}" registrado con ID #${data.id}`);
+        document.getElementById('inp-nombre').value = '';
+        document.getElementById('inp-id').value = '';
+        document.getElementById('inp-cel').value = '';
+        cargarClientes();
+      } else {
+        showAlert('alert-cliente', 'error', data.error || 'Error al registrar.');
+      }
+    } catch (err) {
+      showAlert('alert-cliente', 'error', 'No se pudo conectar con la API.');
+    }
+  }
+
+  // ===================== RESERVAS =====================
+  async function cargarReservas() {
+    const tbody = document.getElementById('tabla-reservas');
+    tbody.innerHTML = `<tr><td colspan="10" class="loading">Cargando...</td></tr>`;
+    try {
+      const res  = await fetch(`${API}/reservas`);
+      const data = await res.json();
+      if (!data.length) {
+        tbody.innerHTML = `<tr><td colspan="10" class="loading">No hay reservas registradas.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = data.map(r => `
+        <tr>
+          <td><strong style="color:#e94560">#${r.id}</strong></td>
+          <td>
+            <strong style="color:#fff">${r.cliente?.nombre || '—'}</strong>
+            <div style="font-size:0.75rem;color:#8080a0">${r.cliente?.celular || ''}</div>
+          </td>
+          <td>
+            <strong style="color:#fff">${r.instrumento?.marca || ''} ${r.instrumento?.modelo || ''}</strong>
+            <div style="font-size:0.75rem;color:#8080a0">${tipoLabel(r.instrumento?.tipo || '')}</div>
+          </td>
+          <td>${formatFecha(r.fechaInicio)}</td>
+          <td>${formatFecha(r.fechaDevolucion)}</td>
+          <td style="text-align:center">
+            <strong>${diasEntre(r.fechaInicio, r.fechaDevolucion)}</strong>
+          </td>
+          <td class="precio-highlight">$${r.precioTotal.toLocaleString('es-CO')}</td>
+          <td style="font-size:0.78rem;color:#a0a0c0">${r.estadoAlMomentoDeEntrega || '—'}</td>
+          <td>
+            <span class="badge ${r.activa ? 'badge-disponible' : 'badge-usado'}">
+              ${r.activa ? '🟢 Activa' : '⚫ Finalizada'}
+            </span>
+          </td>
+          <td>
+            <div class="td-actions">
+              ${r.activa ? `
+                <button class="btn btn-success" style="font-size:0.78rem;padding:6px 12px"
+                  onclick="abrirModalDevolucion(${r.id})">📥 Devolver</button>
+                <button class="btn btn-danger" onclick="cancelarReserva(${r.id})">❌ Cancelar</button>
+              ` : `<span style="color:#4a4a6a;font-size:0.8rem">Finalizada</span>`}
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    } catch (err) {
+      tbody.innerHTML = `<tr><td colspan="10" style="color:#e74c3c;padding:20px">Error al conectar con la API.</td></tr>`;
+    }
+  }
+
+  async function crearReserva() {
+    const clienteId     = document.getElementById('inp-res-cliente').value;
+    const instrumentoId = document.getElementById('inp-res-instrumento').value;
+    const inicio        = document.getElementById('inp-res-inicio').value;
+    const fin           = document.getElementById('inp-res-fin').value;
+    const descuento     = document.getElementById('inp-res-descuento').value;
+
+    if (!clienteId || !instrumentoId || !inicio || !fin) {
+      showAlert('alert-reserva', 'error', 'Completa todos los campos obligatorios.');
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API}/reservas`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clienteId: clienteId,
+          instrumentoId: instrumentoId,
+          fechaInicio: inicio,
+          fechaDevolucion: fin,
+          tipoDescuento: descuento
+        })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showAlert('alert-reserva', 'success',
+          `Reserva #${data.id} creada. Total: $${data.precioTotal?.toLocaleString('es-CO')}`);
+        document.getElementById('inp-res-cliente').value = '';
+        document.getElementById('inp-res-instrumento').value = '';
+        document.getElementById('inp-res-inicio').value = '';
+        document.getElementById('inp-res-fin').value = '';
+        cargarReservas();
+      } else {
+        showAlert('alert-reserva', 'error', data.error || 'No se pudo crear la reserva.');
+      }
+    } catch (err) {
+      showAlert('alert-reserva', 'error', 'No se pudo conectar con la API.');
+    }
+  }
+
+  async function cancelarReserva(id) {
+    if (!confirm(`¿Cancelar la reserva #${id}?`)) return;
+    try {
+      const res = await fetch(`${API}/reservas/${id}`, { method: 'DELETE' });
+      if (res.ok) cargarReservas();
+      else {
+        const d = await res.json();
+        alert('Error: ' + (d.error || 'No se pudo cancelar.'));
+      }
+    } catch (err) {
+      alert('Error al conectar con la API.');
+    }
+  }
+
+  function abrirModalDevolucion(reservaId) {
+    document.getElementById('modal-reserva-id').value = reservaId;
+    document.getElementById('modal-devolucion').classList.add('show');
+  }
+
+  function cerrarModal() {
+    document.getElementById('modal-devolucion').classList.remove('show');
+  }
+
+  async function confirmarDevolucion() {
+    const id     = document.getElementById('modal-reserva-id').value;
+    const estado = document.getElementById('modal-estado').value;
+    try {
+      const res = await fetch(`${API}/reservas/${id}/devolucion`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ estadoDevolucion: estado })
+      });
+      if (res.ok) {
+        cerrarModal();
+        cargarReservas();
+      } else {
+        const d = await res.json();
+        alert('Error: ' + (d.error || 'No se pudo registrar la devolucion.'));
+      }
+    } catch (err) {
+      alert('Error al conectar con la API.');
+    }
+  }
+
+  // ===================== INIT =====================
+  // Cargar dashboard al iniciar
+  window.addEventListener('load', cargarDashboard);
+</script>
+</body>
+</html>
